@@ -3,6 +3,7 @@ package com.example.test
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.IntentFilter
+import android.media.AudioManager
 import android.os.Bundle
 import android.telephony.TelephonyManager
 import android.util.Log
@@ -16,6 +17,15 @@ class MainActivity : FragmentActivity() {
     private var callReceiver: CallReceiver? = null
     private var webView: WebView? = null
     lateinit var biometricHelper: BiometricHelper
+    private var TAG: String = "asdf"
+    private val requestAudioPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                Log.d(TAG, "🎤 RECORD_AUDIO 권한 허용됨!")
+            } else {
+                Log.e(TAG, "❌ RECORD_AUDIO 권한 거부됨!")
+            }
+        }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +47,8 @@ class MainActivity : FragmentActivity() {
         requestPermissionsLauncher.launch(
             arrayOf(
                 Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.READ_CALL_LOG
+                Manifest.permission.READ_CALL_LOG,
+                Manifest.permission.RECORD_AUDIO
             )
         )
     }
@@ -62,6 +73,11 @@ class MainActivity : FragmentActivity() {
         Log.d("MainActivity", "CallReceiver 등록됨!")
     }
 
+    private fun isCallRecording(): Boolean {
+        val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
+        return audioManager.mode == AudioManager.MODE_IN_CALL && !audioManager.isMicrophoneMute
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         callReceiver?.let {
@@ -70,3 +86,4 @@ class MainActivity : FragmentActivity() {
         }
     }
 }
+
