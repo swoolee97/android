@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>생체 인증 테스트</title>
+    <script>
+        function requestBiometricAuth() {
+            if (window.AndroidBiometric) {
+                window.AndroidBiometric.authenticate();
+            } else {
+                alert("안드로이드 생체 인증을 사용할 수 없습니다.");
+            }
+        }
+    </script>
+</head>
+<body>
+<h1>생체 인증 테스트 페이지</h1>
+<button onclick="requestBiometricAuth()">생체 인증하기</button>
+</body>
+</html>
