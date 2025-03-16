@@ -2,9 +2,14 @@ package com.example.test
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.webkit.WebChromeClient
@@ -44,6 +49,8 @@ class MainActivity : FragmentActivity() {
 
         Log.d("MainActivity", "onCreate 호출됨!")
 
+        requestStoragePermission()
+
         requestPermissionsLauncher.launch(
             arrayOf(
                 Manifest.permission.READ_PHONE_STATE,
@@ -72,6 +79,36 @@ class MainActivity : FragmentActivity() {
         registerReceiver(callReceiver, filter)
         Log.d("MainActivity", "CallReceiver 등록됨!")
     }
+
+    private val requestManageStoragePermission =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (Environment.isExternalStorageManager()) {
+                    Log.d("Permission", "✅ MANAGE_EXTERNAL_STORAGE 권한 허용됨!")
+                } else {
+                    Log.e("Permission", "❌ MANAGE_EXTERNAL_STORAGE 권한 거부됨!")
+                }
+            }
+        }
+
+    fun requestStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                val intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION)
+                intent.data = Uri.parse("package:$packageName")
+                requestManageStoragePermission.launch(intent)
+            }
+        } else {
+            requestPermissionsLauncher.launch(
+                arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
+        }
+    }
+
+
 
     private fun isCallRecording(): Boolean {
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager

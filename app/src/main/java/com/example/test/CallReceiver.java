@@ -26,29 +26,43 @@ public class CallReceiver extends BroadcastReceiver {
     private final Handler handler = new Handler(Looper.getMainLooper());
     private CallRecordingObserver callRecordingObserver;
 
+    private CallRecordingFileObserver fileObserver;
+    private static final String RECORDING_PATH = "/storage/emulated/0/Recordings/Call/"; // 삼성폰 기준
+
+    private void registerCallRecordingObserver() {
+        if (fileObserver == null) {
+            fileObserver = new CallRecordingFileObserver(RECORDING_PATH);
+            fileObserver.startWatching();
+            Log.d(TAG, "📡 통화 녹음 감지 시작 (FileObserver)!");
+        }
+    }
+
+    private void unregisterCallRecordingObserver() {
+        if (fileObserver != null) {
+            fileObserver.stopWatching();
+            fileObserver = null;
+            Log.d(TAG, "📡 통화 녹음 감지 중지 (FileObserver)!");
+        }
+    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
         if (TelephonyManager.ACTION_PHONE_STATE_CHANGED.equals(intent.getAction())) {
             String state = intent.getStringExtra(TelephonyManager.EXTRA_STATE);
 
             if (state == null || state.equals(lastState)) {
-                // 🔥 상태가 변하지 않았으면 무시
                 return;
             }
-            lastState = state;  // 🔥 상태 업데이트
+            lastState = state;
 
             Log.d(TAG, "📞 전화 상태 변경 감지됨: " + state);
 
-            if (TelephonyManager.EXTRA_STATE_RINGING.equals(state)) {
-                handleRingingCall(context);
-            } else if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state)) {
+            if (TelephonyManager.EXTRA_STATE_OFFHOOK.equals(state)) {
                 Log.d(TAG, "📲 통화 중!");
-                registerCallRecordingObserver(context); // 녹음 파일 감지 시작
+                registerCallRecordingObserver(); // 파일 생성 감지 시작
             } else if (TelephonyManager.EXTRA_STATE_IDLE.equals(state)) {
                 Log.d(TAG, "❌ 통화 종료됨!");
-                unregisterCallRecordingObserver(context); // 녹음 파일 감지 중지
+                unregisterCallRecordingObserver(); // 파일 생성 감지 중지
             }
         }
     }
