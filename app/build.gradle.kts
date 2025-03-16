@@ -60,10 +60,13 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
     implementation("androidx.activity:activity-ktx:1.7.2")
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+    implementation("com.google.android.material:material:1.3.0")
 
     // ✅ FFmpeg 의존성 추가 (올바른 방식)
 //    implementation("com.arthenica:mobile-ffmpeg-full:4.3.2.LTS")
 //    implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
-    implementation ("com.arthenica:ffmpeg-kit-full:4.5.1-1")
+//    implementation ("com.arthenica:ffmpeg-kit-full:4.5.1-1")
+//    implementation ("com.arthenica:ffmpeg-kit-android:4.5")
+    implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
 
 }

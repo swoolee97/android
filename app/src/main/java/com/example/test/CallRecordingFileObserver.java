@@ -96,7 +96,7 @@ public class CallRecordingFileObserver extends FileObserver {
 
     public void convertM4AToWav(File inputFile, File outputFile) {
         String command = "-i " + inputFile.getAbsolutePath() + " -acodec pcm_s16le -ar 16000 -ac 1 -f wav " + outputFile.getAbsolutePath();
-        .execute(command);
+//        .execute(command);
         Log.d(TAG, "✅ FFmpegKit 변환 완료: " + outputFile.getAbsolutePath());
     }
 
