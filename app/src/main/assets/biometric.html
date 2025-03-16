@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>생체 인증 테스트</title>
+    <title>생체 인증 및 토큰 관리</title>
     <script>
         function requestBiometricAuth() {
             if (window.AndroidBiometric) {
@@ -12,10 +12,41 @@
                 alert("안드로이드 생체 인증을 사용할 수 없습니다.");
             }
         }
+
+        function requestAccessToken() {
+            if (window.AndroidBridge) {
+                const tokenData = window.AndroidBridge.getAccessToken();
+                const parsedData = JSON.parse(tokenData);
+
+                alert("AccessToken: " + parsedData.accessToken + "\nRefreshToken: " + parsedData.refreshToken);
+            } else {
+                alert("안드로이드 토큰을 가져올 수 없습니다.");
+            }
+        }
+
+        function saveAccessToken() {
+            if (window.AndroidBridge) {
+                const accessToken = prompt("저장할 AccessToken을 입력하세요:", "example-access-token");
+                const refreshToken = prompt("저장할 RefreshToken을 입력하세요:", "example-refresh-token");
+
+                if (accessToken && refreshToken) {
+                    window.AndroidBridge.saveTokens(accessToken, refreshToken);
+                    alert("토큰이 저장되었습니다!");
+                } else {
+                    alert("토큰을 입력해야 합니다.");
+                }
+            } else {
+                alert("안드로이드 토큰 저장 기능을 사용할 수 없습니다.");
+            }
+        }
     </script>
 </head>
 <body>
-<h1>생체 인증 테스트 페이지</h1>
+<h1>생체 인증 및 토큰 관리</h1>
 <button onclick="requestBiometricAuth()">생체 인증하기</button>
+<br><br>
+<button onclick="requestAccessToken()">AccessToken 요청</button>
+<br><br>
+<button onclick="saveAccessToken()">AccessToken 저장</button>
 </body>
 </html>

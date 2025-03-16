@@ -44,20 +44,6 @@ public class AudioProcessor {
         });
     }
 
-//    private static void startSegmentConversion(String inputFilePath, String outputFilePattern) {
-//        String cmd = "-i \"" + inputFilePath + "\" -c copy -f segment -segment_time 30 -reset_timestamps 1 \"" + outputFilePattern + "\"";
-//
-//        FFmpegKit.executeAsync(cmd, session -> {
-//            ReturnCode returnCode = session.getReturnCode();
-//            if (ReturnCode.isSuccess(returnCode)) {
-//                Log.d(TAG, "✅ 오디오 파일이 30초 단위로 분할됨!");
-//                uploadSplitFiles(new File(inputFilePath).getParent());
-//            } else {
-//                Log.e(TAG, "❌ 오디오 분할 실패: " + session.getAllLogsAsString());
-//            }
-//        });
-//    }
-
     private static void startSegmentConversion(String inputFilePath, String outputDir) {
         String outputFilePattern = outputDir + "/split_%03d.wav"; // 파일 이름 패턴
 

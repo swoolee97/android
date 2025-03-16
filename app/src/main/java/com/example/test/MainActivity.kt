@@ -2,8 +2,10 @@ package com.example.test
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.SharedPreferences
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Build
@@ -12,6 +14,7 @@ import android.os.Environment
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -23,6 +26,8 @@ class MainActivity : FragmentActivity() {
     private var webView: WebView? = null
     lateinit var biometricHelper: BiometricHelper
     private var TAG: String = "asdf"
+    private lateinit var sharedPreferences: SharedPreferences
+
     private val requestAudioPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
@@ -36,12 +41,16 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // SharedPreferences 초기화 (토큰 저장용)
+        sharedPreferences = getSharedPreferences("TokenStorage", Context.MODE_PRIVATE)
+
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
             webViewClient = WebViewClient()
             webChromeClient = WebChromeClient()
-            addJavascriptInterface(BiometricWebInterface(this@MainActivity), "AndroidBiometric")
-            loadUrl("file:///android_asset/biometric.html")
+            addJavascriptInterface(BiometricWebInterface(this@MainActivity), "AndroidBiometric") // 이 이름으로 웹뷰에서 생체 인증을 요청한다.
+            addJavascriptInterface(TokenWebInterface(), "AndroidBridge") // 이 이름으로 웹뷰에서 토큰을 저장/요청한다.
+            loadUrl("file:///android_asset/biometric.html") // 여기에 배포 url 홈화면 작성
         }
         setContentView(webView)
 
@@ -108,8 +117,6 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-
-
     private fun isCallRecording(): Boolean {
         val audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
         return audioManager.mode == AudioManager.MODE_IN_CALL && !audioManager.isMicrophoneMute
@@ -122,5 +129,26 @@ class MainActivity : FragmentActivity() {
             Log.d("MainActivity", "CallReceiver 해제됨!")
         }
     }
-}
 
+    // Android → WebView 브릿지 추가
+    inner class TokenWebInterface {
+        @JavascriptInterface
+        fun getAccessToken(): String {
+            val accessToken = sharedPreferences.getString("accessToken", "No AccessToken")
+            val refreshToken = sharedPreferences.getString("refreshToken", "No RefreshToken")
+
+            // JavaScript에서 JSON 형태로 사용할 수 있도록 반환
+            return """{"accessToken": "$accessToken", "refreshToken": "$refreshToken"}"""
+        }
+
+        @JavascriptInterface
+        fun saveTokens(accessToken: String, refreshToken: String) {
+            sharedPreferences.edit().apply {
+                putString("accessToken", accessToken)
+                putString("refreshToken", refreshToken)
+                apply()
+            }
+            Log.d(TAG, "✅ AccessToken 및 RefreshToken 저장됨!")
+        }
+    }
+}
