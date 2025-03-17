@@ -1,14 +1,9 @@
-package com.example.test;
+package com.example.test.call;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.media.AudioFormat;
-import android.media.AudioManager;
-import android.media.AudioRecord;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,16 +11,10 @@ import android.provider.CallLog;
 import android.provider.MediaStore;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.Manifest;
-
-import androidx.core.content.ContextCompat;
 
 public class CallReceiver extends BroadcastReceiver {
     private static final String TAG = "CallReceiver";
     private static String lastState = "";  // 🔥 static 변수로 변경 (앱이 살아있는 동안 유지)
-    private final Handler handler = new Handler(Looper.getMainLooper());
-    private CallRecordingObserver callRecordingObserver;
-
     private CallRecordingFileObserver fileObserver;
     private static final String RECORDING_PATH = "/storage/emulated/0/Recordings/Call/"; // 삼성폰 기준
 
@@ -89,26 +78,6 @@ public class CallReceiver extends BroadcastReceiver {
             return lastCallNumber;
         }
         return "알 수 없음";
-    }
-
-    private void registerCallRecordingObserver(Context context) {
-        if (callRecordingObserver == null) {
-            callRecordingObserver = new CallRecordingObserver(new Handler(Looper.getMainLooper()), context.getContentResolver());
-            context.getContentResolver().registerContentObserver(
-                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                    true,
-                    callRecordingObserver
-            );
-            Log.d(TAG, "📡 통화 녹음 감지 시작!");
-        }
-    }
-
-    private void unregisterCallRecordingObserver(Context context) {
-        if (callRecordingObserver != null) {
-            context.getContentResolver().unregisterContentObserver(callRecordingObserver);
-            callRecordingObserver = null;
-            Log.d(TAG, "📡 통화 녹음 감지 중지!");
-        }
     }
 
 }

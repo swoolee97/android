@@ -68,5 +68,5 @@ dependencies {
 //    implementation ("com.arthenica:ffmpeg-kit-full:4.5.1-1")
 //    implementation ("com.arthenica:ffmpeg-kit-android:4.5")
     implementation("com.arthenica:ffmpeg-kit-full:6.0-2")
-
+    implementation("androidx.activity:activity:1.10.1")
 }

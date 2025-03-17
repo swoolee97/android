@@ -1,15 +1,14 @@
-package com.example.test
+package com.example.test.biometric
 
 import android.content.Context
 import android.util.Log
-import android.webkit.WebView
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import java.util.concurrent.Executor
 
-class BiometricHelper(private val context: Context, private val webView: WebView?) {
+class BiometricHelper(private val context: Context, private val callback: BiometricCallback) {
     private val executor: Executor = ContextCompat.getMainExecutor(context)
     private val biometricPrompt: BiometricPrompt
     private val promptInfo: BiometricPrompt.PromptInfo
@@ -19,12 +18,12 @@ class BiometricHelper(private val context: Context, private val webView: WebView
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
-                    webView?.evaluateJavascript("alert('생체 인증 성공!')", null)
+                    callback.onBiometricSuccess() // ✅ 성공 시 콜백 실행
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    webView?.evaluateJavascript("alert('생체 인증 실패: $errString')", null)
+                    callback.onBiometricFailure(errString.toString()) // ✅ 실패 시 콜백 실행
                 }
             })
 
@@ -40,7 +39,7 @@ class BiometricHelper(private val context: Context, private val webView: WebView
             biometricPrompt.authenticate(promptInfo)
         } else {
             Log.e("BiometricHelper", "생체 인증이 지원되지 않음")
-            webView?.evaluateJavascript("alert('생체 인증이 지원되지 않는 기기입니다.')", null)
+            callback.onBiometricFailure("생체 인증이 지원되지 않는 기기입니다.") // ✅ 생체 인증 불가 시 콜백 실행
         }
     }
 
